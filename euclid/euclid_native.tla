@@ -16,35 +16,45 @@ IsGCD(i,j,k) ==
       /\ Divides(x,j)
       /\ Divides(x,k)
 
-VARIABLES m, n, x, y \*, pc
+VARIABLES m, n, x, y, pc
 
-vars == << m, n, x, y >> \*, pc >>
+vars == << m, n, x, y, pc >>
+
+NextPC ==
+  /\ pc' = CASE x = y -> "Done"
+            []  x < y -> "XLess"
+            []  x > y -> "YLess"
+  /\ UNCHANGED << m, n, x, y >>
 
 Init == \* global variables
   /\ m \in 1..M
   /\ n \in 1..N
   /\ x = m
   /\ y = n
-\*  /\ pc = "Init"
+  /\ pc = "Init"
 
 XLess ==
+  /\ pc = "XLess"
   /\ x < y
   /\ y' = y - x
-  /\ UNCHANGED << m, n, x >> \*, pc >>
+  /\ UNCHANGED << m, n, x, pc >>
 
 YLess ==
+  /\ pc = "YLess"
   /\ y < x
   /\ x' = x - y
-  /\ UNCHANGED << m, n, y >> \*, pc >>
+  /\ UNCHANGED << m, n, y, pc >>
 
 Terminating ==
   /\ x = y
+  /\ NextPC
   /\ IsGCD(x,m,n)
   /\ PrintT(<< x,m,n >>)
-\*  /\ pc = "Done"
+  /\ pc = "Done"
   /\ UNCHANGED vars
 
 Next ==
+  \/ NextPC
   \/ XLess
   \/ YLess
   \/ Terminating
